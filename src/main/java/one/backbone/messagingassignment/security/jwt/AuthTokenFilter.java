@@ -7,12 +7,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import one.backbone.messagingassignment.repository.TokenRepository;
-import one.backbone.messagingassignment.security.service.UserDetailsServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -21,16 +21,22 @@ import java.io.IOException;
  * The type Auth token filter.
  */
 @Slf4j
+@Component
 public class AuthTokenFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private TokenRepository tokenRepository;
+    private final TokenRepository tokenRepository;
 
-    @Autowired
-    private JwtUtils jwtUtils;
+    private final JwtUtils jwtUtils;
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+    private final UserDetailsService userDetailsService;
+
+    public AuthTokenFilter(TokenRepository tokenRepository,
+                           JwtUtils jwtUtils,
+                           UserDetailsService userDetailsService) {
+        this.tokenRepository = tokenRepository;
+        this.jwtUtils = jwtUtils;
+        this.userDetailsService = userDetailsService;
+    }
 
 
     @Override

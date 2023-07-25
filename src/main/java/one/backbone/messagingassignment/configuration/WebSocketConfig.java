@@ -2,7 +2,6 @@ package one.backbone.messagingassignment.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import one.backbone.messagingassignment.security.jwt.JwtUtils;
-import one.backbone.messagingassignment.security.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -17,6 +16,7 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -32,9 +32,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final JwtUtils jwtTokenProvider;
 
-    private final UserDetailsServiceImpl userDetailsService;
+    private final UserDetailsService userDetailsService;
 
-    public WebSocketConfig(JwtUtils jwtTokenProvider, UserDetailsServiceImpl userDetailsService) {
+    public WebSocketConfig(JwtUtils jwtTokenProvider, UserDetailsService userDetailsService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userDetailsService = userDetailsService;
     }

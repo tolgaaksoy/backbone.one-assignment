@@ -5,7 +5,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import one.backbone.messagingassignment.security.service.UserDetailsImpl;
+import one.backbone.messagingassignment.model.entity.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -35,7 +35,7 @@ public class JwtUtils {
      */
     public String generateJwtToken(Authentication authentication) {
 
-        UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+        User userPrincipal = (User) authentication.getPrincipal();
 
         return Jwts.builder()
                 .setSubject((userPrincipal.getUsername()))

@@ -18,7 +18,6 @@ import one.backbone.messagingassignment.repository.RoleRepository;
 import one.backbone.messagingassignment.repository.TokenRepository;
 import one.backbone.messagingassignment.repository.UserRepository;
 import one.backbone.messagingassignment.security.jwt.JwtUtils;
-import one.backbone.messagingassignment.security.service.UserDetailsImpl;
 import one.backbone.messagingassignment.service.AuthService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,7 +30,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * The implementation of the {@link AuthService} interface.
@@ -58,7 +56,7 @@ public class AuthServiceImpl implements AuthService, LogoutHandler {
      * @param userRepository        the user repository
      * @param encoder               the encoder
      * @param jwtUtils              the jwt utils
-     * @param tokenRepository
+     * @param tokenRepository       the token repository
      * @param userMapper            the user mapper
      * @param roleRepository        the role repository
      */
@@ -92,13 +90,12 @@ public class AuthServiceImpl implements AuthService, LogoutHandler {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
+        User user = (User) authentication.getPrincipal();
+        List<String> roles = user.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
+                .toList();
 
         String jwt = jwtUtils.generateJwtToken(authentication);
-        User user = userRepository.findByUsername(loginRequest.getUsername()).orElseThrow();
 
         revokeAllUserTokens(user);
         saveUserToken(user, jwt);
@@ -106,7 +103,7 @@ public class AuthServiceImpl implements AuthService, LogoutHandler {
         return LoginResponse.builder()
                 .token(jwt)
                 .roles(roles)
-                .username(userDetails.getUsername())
+                .username(user.getUsername())
                 .build();
     }
 

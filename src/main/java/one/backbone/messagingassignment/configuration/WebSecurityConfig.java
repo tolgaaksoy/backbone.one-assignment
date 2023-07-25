@@ -3,7 +3,6 @@ package one.backbone.messagingassignment.configuration;
 import jakarta.servlet.http.HttpServletResponse;
 import one.backbone.messagingassignment.security.jwt.AuthEntryPointJwt;
 import one.backbone.messagingassignment.security.jwt.AuthTokenFilter;
-import one.backbone.messagingassignment.security.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,9 +10,11 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -24,39 +25,23 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
  * The type Web security config.
  */
 @Configuration
+@EnableWebSecurity
 @EnableMethodSecurity
 public class WebSecurityConfig {
 
-    private final UserDetailsServiceImpl userDetailsService;
+    private final AuthTokenFilter authTokenFilter;
     private final AuthEntryPointJwt unauthorizedHandler;
 
-    /**
-     * Instantiates a new Web security config.
-     *
-     * @param userDetailsService  the user details service
-     * @param unauthorizedHandler the unauthorized handler
-     */
-    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService,
-                             AuthEntryPointJwt unauthorizedHandler) {
-        this.userDetailsService = userDetailsService;
+    private final UserDetailsService userDetailsService;
+
+    public WebSecurityConfig(AuthTokenFilter authTokenFilter,
+                             AuthEntryPointJwt unauthorizedHandler,
+                             UserDetailsService userDetailsService) {
+        this.authTokenFilter = authTokenFilter;
         this.unauthorizedHandler = unauthorizedHandler;
+        this.userDetailsService = userDetailsService;
     }
 
-    /**
-     * Authentication jwt token filter auth token filter.
-     *
-     * @return the auth token filter
-     */
-    @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter();
-    }
-
-    /**
-     * Authentication provider dao authentication provider.
-     *
-     * @return the dao authentication provider
-     */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -112,7 +97,8 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(headers -> headers.frameOptions().sameOrigin())
-                .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout.logoutUrl("/auth/logout").logoutSuccessHandler((request, response, authentication) -> {
                     SecurityContextHolder.clearContext();
                     response.setStatus(HttpServletResponse.SC_OK);
