@@ -1,64 +1,63 @@
 package one.backbone.messagingassignment.controller;
 
-import one.backbone.messagingassignment.model.dto.MessageDto;
 import one.backbone.messagingassignment.model.dto.request.GetMessageRequest;
 import one.backbone.messagingassignment.model.dto.request.SendMessageRequest;
+import one.backbone.messagingassignment.model.entity.Message;
 import one.backbone.messagingassignment.model.entity.User;
-import one.backbone.messagingassignment.service.MessageService;
+import one.backbone.messagingassignment.service.MessageWSService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.annotation.SubscribeMapping;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 
-import java.util.Collections;
+import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @Controller
 public class MessageWSController {
 
-    private final MessageService messageService;
-    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final MessageWSService messageWSService;
 
-    public MessageWSController(MessageService messageService,
-                               SimpMessagingTemplate simpMessagingTemplate) {
-        this.messageService = messageService;
-        this.simpMessagingTemplate = simpMessagingTemplate;
+    public MessageWSController(MessageWSService messageWSService) {
+        this.messageWSService = messageWSService;
     }
 
-    @MessageMapping("/send-message")
-    @SendTo("/topic/messages")
-    public MessageDto sendMessage(@Payload SendMessageRequest request) {
-        // Process the request and send the message
-        MessageDto message = messageService.sendMessage(request);
+    @MessageMapping("/send")
+    @SendToUser("/queue/messages")
+    public Message sendMessage(Principal principal, SendMessageRequest messageRequest) {
+        String messageText = messageRequest.getMessage();
+        User sender = new User();
+        sender.setId(messageRequest.getSenderId());
+        User recipient = new User();
+        recipient.setId(messageRequest.getRecipientId());
+        Message newMessage = messageWSService.sendMessage(messageText, sender, recipient);
 
-        // Broadcast the message to the sender and recipient
-        simpMessagingTemplate.convertAndSendToUser(message.getSenderId().toString(), "/queue/messages", message);
-        simpMessagingTemplate.convertAndSendToUser(message.getRecipientId().toString(), "/queue/messages", message);
-
-        // Return the message object to be sent to the topic
-        return message;
+        // Broadcast the newMessage to the recipient user via WebSocket
+        return newMessage;
     }
 
-    @SubscribeMapping("/queue/messages")
-    public List<MessageDto> handleSubscription(@Payload(required = false) GetMessageRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            User user = (User) authentication.getPrincipal();
+    @MessageMapping("/retrieve")
+    @SendToUser("/queue/messages")
+    public List<Message> getMessagesByUserId(Principal principal, GetMessageRequest messageRetrieveRequest) {
+        Long userId = Long.parseLong(principal.getName());
+        LocalDateTime fromDate = convertToDate(messageRetrieveRequest.getFrom());
+        LocalDateTime toDate = convertToDate(messageRetrieveRequest.getTo());
 
-            if (!Objects.equals(user.getId(), request.getRecipientId())) {
-                // If the recipient id in the request does not match the authenticated user's id, return an empty list
-                return Collections.emptyList();
-            }
-
-            // Retrieve previous messages for the authenticated user from the database
-            return messageService.getMessages(request);
+        List<Message> messages;
+        if (fromDate != null && toDate != null) {
+            messages = messageWSService.getMessagesByUserIdAndDateRange(userId, fromDate, toDate);
+        } else {
+            messages = messageWSService.getMessagesByUserId(userId);
         }
 
-        return Collections.emptyList();
+        return messages;
+    }
+
+    private LocalDateTime convertToDate(String date) {
+        LocalDateTime result = null;
+        if (date != null) {
+            result = LocalDateTime.parse(date);
+        }
+        return result;
     }
 }

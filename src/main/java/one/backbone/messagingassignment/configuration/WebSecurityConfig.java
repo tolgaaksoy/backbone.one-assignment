@@ -99,6 +99,10 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
+                                .requestMatchers(new AntPathRequestMatcher("/websocket/**")).permitAll()
+                                .requestMatchers(new AntPathRequestMatcher("/websocket/ws/**")).permitAll()
+                                .requestMatchers(new AntPathRequestMatcher("/api/websocket/**")).permitAll()
+                                .requestMatchers(new AntPathRequestMatcher("/api/websocket/ws/**")).permitAll()
                                 .requestMatchers(new AntPathRequestMatcher("/ws/**")).permitAll()
                                 .requestMatchers(new AntPathRequestMatcher("/api/ws/**")).permitAll()
                                 .requestMatchers(new AntPathRequestMatcher("/v3/**")).permitAll()
