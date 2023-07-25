@@ -39,9 +39,9 @@ public class UserController {
     public ResponseEntity<UserResponse> updateUser(@Valid @RequestBody UpdateUserRequest request) {
         UserResponse response = UserResponse.builder()
                 .user(userService.updateUser(request))
-                .status(200)
-                .timestamp(Instant.now())
-                .message("User updated successfully")
+                .responseStatus(200)
+                .responseTimestamp(Instant.now())
+                .responseMessage("User updated successfully")
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -56,9 +56,9 @@ public class UserController {
     public ResponseEntity<UserResponse> deleteUser(@PathVariable Long id) {
         userService.deleteUserById(id);
         UserResponse response = UserResponse.builder()
-                .status(200)
-                .timestamp(Instant.now())
-                .message("User deleted successfully")
+                .responseStatus(200)
+                .responseTimestamp(Instant.now())
+                .responseMessage("User deleted successfully")
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -73,9 +73,9 @@ public class UserController {
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
         UserResponse response = UserResponse.builder()
                 .user(userService.getUserById(id))
-                .status(200)
-                .timestamp(Instant.now())
-                .message("User retrieved successfully")
+                .responseStatus(200)
+                .responseTimestamp(Instant.now())
+                .responseMessage("User retrieved successfully")
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -91,9 +91,9 @@ public class UserController {
     public ResponseEntity<UserResponse> getAllUsers(Pageable pageable) {
         UserResponse response = UserResponse.builder()
                 .userPage(userService.getAllUsers(pageable))
-                .status(200)
-                .timestamp(Instant.now())
-                .message("Users retrieved successfully")
+                .responseStatus(200)
+                .responseTimestamp(Instant.now())
+                .responseMessage("Users retrieved successfully")
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

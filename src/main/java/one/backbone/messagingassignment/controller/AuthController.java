@@ -40,9 +40,9 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
         LoginResponse response = authService.authenticateUser(loginRequest);
-        response.setStatus(200);
-        response.setTimestamp(Instant.now());
-        response.setMessage("Login Successful");
+        response.setResponseStatus(200);
+        response.setResponseTimestamp(Instant.now());
+        response.setResponseMessage("Login Successful");
         return ResponseEntity.ok(response);
     }
 
@@ -56,9 +56,9 @@ public class AuthController {
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
         UserResponse response = UserResponse.builder()
                 .user(authService.createUser(request))
-                .status(201)
-                .timestamp(Instant.now())
-                .message("User created successfully")
+                .responseStatus(201)
+                .responseTimestamp(Instant.now())
+                .responseMessage("User created successfully")
                 .build();
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -73,9 +73,9 @@ public class AuthController {
     public ResponseEntity<UserResponse> updateUser(@Valid @RequestBody UpdateUserAuthenticationInfoRequest request) {
         UserResponse response = UserResponse.builder()
                 .user(authService.updateUserAuthenticationInformation(request))
-                .status(200)
-                .timestamp(Instant.now())
-                .message("User authentication information updated successfully")
+                .responseStatus(200)
+                .responseTimestamp(Instant.now())
+                .responseMessage("User authentication information updated successfully")
                 .build();
         return ResponseEntity.ok(response);
     }

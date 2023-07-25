@@ -28,9 +28,9 @@ public class UserManagementExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public BaseResponse handleTUserNotFoundException(UserNotFoundException ex, WebRequest request) {
         return BaseResponse.builder()
-                .status(HttpStatus.NOT_FOUND.value())
-                .message(ex.getMessage())
-                .timestamp(Instant.now())
+                .responseStatus(HttpStatus.NOT_FOUND.value())
+                .responseMessage(ex.getMessage())
+                .responseTimestamp(Instant.now())
                 .build();
     }
 
@@ -38,9 +38,9 @@ public class UserManagementExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public BaseResponse handleUsernameAlreadyExistException(UsernameAlreadyExistException ex, WebRequest request) {
         return BaseResponse.builder()
-                .status(HttpStatus.CONFLICT.value())
-                .message(ex.getMessage())
-                .timestamp(Instant.now())
+                .responseStatus(HttpStatus.CONFLICT.value())
+                .responseMessage(ex.getMessage())
+                .responseTimestamp(Instant.now())
                 .build();
     }
 

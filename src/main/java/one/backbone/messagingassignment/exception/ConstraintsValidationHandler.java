@@ -20,9 +20,9 @@ public class ConstraintsValidationHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public BaseResponse handleConstraintViolationException(ConstraintViolationException ex, WebRequest request) {
         return BaseResponse.builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .message(ex.getMessage())
-                .timestamp(Instant.now())
+                .responseStatus(HttpStatus.BAD_REQUEST.value())
+                .responseMessage(ex.getMessage())
+                .responseTimestamp(Instant.now())
                 .build();
     }
 

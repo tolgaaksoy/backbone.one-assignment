@@ -17,12 +17,12 @@ import java.time.Instant;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonPropertyOrder({"status", "message", "description", "timestamp"})
+@JsonPropertyOrder({"responseStatus", "responseMessage", "responseDescription", "responseTimestamp"})
 public class BaseResponse {
 
-    private int status;
-    private String message;
-    private String description;
-    private Instant timestamp;
+    private int responseStatus;
+    private String responseMessage;
+    private String responseDescription;
+    private Instant responseTimestamp;
 
 }
