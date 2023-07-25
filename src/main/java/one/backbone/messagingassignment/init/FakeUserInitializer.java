@@ -4,7 +4,6 @@ import com.github.javafaker.Faker;
 import lombok.extern.slf4j.Slf4j;
 import one.backbone.messagingassignment.model.dto.request.CreateUserRequest;
 import one.backbone.messagingassignment.model.entity.RoleType;
-import one.backbone.messagingassignment.model.entity.UserRole;
 import one.backbone.messagingassignment.repository.RoleRepository;
 import one.backbone.messagingassignment.service.AuthService;
 import org.springframework.context.annotation.Profile;

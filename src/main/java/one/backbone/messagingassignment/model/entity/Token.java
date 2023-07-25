@@ -11,18 +11,18 @@ import lombok.*;
 @AllArgsConstructor
 public class Token extends BaseEntity {
 
-  @Column(unique = true)
-  public String accessToken;
+    @Column(unique = true)
+    public String accessToken;
 
-  @Enumerated(EnumType.STRING)
-  public TokenType tokenType = TokenType.BEARER;
+    @Enumerated(EnumType.STRING)
+    public TokenType tokenType = TokenType.BEARER;
 
-  public boolean expired = false;
+    public boolean expired = false;
 
-  public boolean revoked = false;
+    public boolean revoked = false;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", nullable = false)
-  public User user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    public User user;
 
 }
