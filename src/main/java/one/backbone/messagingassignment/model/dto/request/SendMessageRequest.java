@@ -10,7 +10,7 @@ import lombok.*;
 public class SendMessageRequest {
 
     private String message;
-    private String senderId;
-    private String recipientId;
+    private Long senderId;
+    private Long recipientId;
 
 }

@@ -2,8 +2,6 @@ package one.backbone.messagingassignment.model.dto.request;
 
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @Builder
@@ -12,10 +10,9 @@ import java.time.LocalDateTime;
 public class GetMessageRequest {
 
     private Long recipientId;
-
     private Long senderId;
 
-    private LocalDateTime from;
+    private String from;
+    private String to;
 
-    private LocalDateTime to;
 }
