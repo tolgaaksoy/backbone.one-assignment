@@ -7,6 +7,7 @@ import one.backbone.messagingassignment.model.dto.UserDto;
 import one.backbone.messagingassignment.model.dto.request.UpdateUserRequest;
 import one.backbone.messagingassignment.model.entity.User;
 import one.backbone.messagingassignment.repository.UserRepository;
+import one.backbone.messagingassignment.service.UserMessageDetailsService;
 import one.backbone.messagingassignment.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,16 +28,21 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+    private final UserMessageDetailsService userMessageDetailsService;
+
     /**
      * Constructs a new UserServiceImpl with the given user repository and user mapper.
      *
-     * @param userRepository the user repository
-     * @param userMapper     the user mapper
+     * @param userRepository            the user repository
+     * @param userMapper                the user mapper
+     * @param userMessageDetailsService the user message details service
      */
     public UserServiceImpl(UserRepository userRepository,
-                           UserMapper userMapper) {
+                           UserMapper userMapper,
+                           UserMessageDetailsService userMessageDetailsService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.userMessageDetailsService = userMessageDetailsService;
     }
 
     /**
@@ -89,7 +95,9 @@ public class UserServiceImpl implements UserService {
         if (user.isEmpty()) {
             throw new UserNotFoundException(id);
         }
-        return userMapper.toDto(user.get());
+        UserDto userDto = userMapper.toDto(user.get());
+        userDto.setAverageResponseTime(userMessageDetailsService.getAverageResponseTimeByUserId(id));
+        return userDto;
     }
 
     /**

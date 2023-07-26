@@ -20,5 +20,6 @@ public class UserDto {
 
     private String name;
 
+    private Float averageResponseTime;
 
 }

@@ -11,19 +11,18 @@ import one.backbone.messagingassignment.model.entity.User;
 import one.backbone.messagingassignment.repository.MessageRepository;
 import one.backbone.messagingassignment.repository.UserRepository;
 import one.backbone.messagingassignment.service.MessageService;
+import one.backbone.messagingassignment.service.UserMessageDetailsService;
 import one.backbone.messagingassignment.service.util.DateUtil;
 import one.backbone.messagingassignment.specification.MessageSpecification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 @Slf4j
 @Service
-public class MessageServiceImpl implements MessageService {
+public class MessageServiceImpl implements MessageService, UserMessageDetailsService {
 
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
@@ -83,5 +82,72 @@ public class MessageServiceImpl implements MessageService {
                 .map(messageMapper::toDto)
                 .collect(LinkedList::new, LinkedList::add, LinkedList::addAll);
     }
+
+    @Override
+    public Float getAverageResponseTimeByUserId(Long userId) {
+        MessageFilterDto senderFilter = MessageFilterDto.builder()
+                .senderId(userId)
+                .build();
+        List<Message> sentMessages = messageRepository.findAll(new MessageSpecification(senderFilter));
+
+        if (sentMessages.isEmpty()) {
+            return 0f;
+        }
+
+        MessageFilterDto recipientFilter = MessageFilterDto.builder()
+                .recipientId(userId)
+                .build();
+        List<Message> receivedMessages = messageRepository.findAll(new MessageSpecification(recipientFilter));
+
+        if (receivedMessages.isEmpty()) {
+            return 0f;
+        }
+
+        // Combine sent and received messages into a single list
+        List<Message> allMessages = new ArrayList<>();
+        allMessages.addAll(sentMessages);
+        allMessages.addAll(receivedMessages);
+
+        // Sort all messages by createdAt timestamp
+        allMessages.sort(Comparator.comparing(Message::getCreatedAt));
+
+        // Calculate the response times and store them in a list
+        List<Long> responseTimes = new ArrayList<>();
+        Map<Long, Message> lastMessageMap = new HashMap<>();
+
+        for (Message message : allMessages) {
+            // Check if the user is the sender or the recipient
+            if (message.getSender().getId().equals(userId)) {
+                // User sent the message
+                Message lastMessage = lastMessageMap.getOrDefault(message.getRecipient().getId(), null);
+                if (lastMessage != null) {
+                    // Calculate response time and add it to the list
+                    long responseTime = ChronoUnit.SECONDS.between(lastMessage.getCreatedAt(), message.getCreatedAt());
+                    responseTimes.add(responseTime);
+                }
+                lastMessageMap.put(message.getRecipient().getId(), message);
+            } else if (message.getRecipient().getId().equals(userId)) {
+                // User received the message
+                Message lastMessage = lastMessageMap.getOrDefault(message.getSender().getId(), null);
+                if (lastMessage != null) {
+                    // Calculate response time and add it to the list
+                    long responseTime = ChronoUnit.SECONDS.between(lastMessage.getCreatedAt(), message.getCreatedAt());
+                    responseTimes.add(responseTime);
+                }
+                lastMessageMap.put(message.getSender().getId(), message);
+            }
+        }
+
+        // Calculate the average response time
+        if (responseTimes.isEmpty()) {
+            return 0f;
+        }
+        double averageResponseTime = responseTimes.stream()
+                .mapToLong(Long::intValue)
+                .average()
+                .orElse(0);
+        return (float) averageResponseTime;
+    }
+
 
 }

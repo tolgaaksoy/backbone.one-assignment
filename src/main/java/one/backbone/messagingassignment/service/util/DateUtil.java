@@ -32,4 +32,11 @@ public class DateUtil {
     }
 
 
+    public static Float getDifferenceInMinutes(LocalDateTime createdAt, LocalDateTime createdAt1) {
+        return (float) (createdAt1.getMinute() - createdAt.getMinute());
+    }
+
+    public static Float getDifferenceInSeconds(LocalDateTime createdAt, LocalDateTime createdAt1) {
+        return (float) (createdAt1.getSecond() - createdAt.getSecond());
+    }
 }
